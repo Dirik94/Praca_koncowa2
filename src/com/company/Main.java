@@ -1,14 +1,14 @@
 package com.company;
 
-import javax.swing.*;
 import java.util.*;
 
-class Exeption1 extends Throwable{
-    public Exeption1(Integer ch){
+class Exeption1 extends Throwable {
+    public Exeption1(Integer ch) {
         exeption(ch);
     }
-    public boolean exeption(Integer ch){
-        if (ch <99 || ch>99){
+
+    public boolean exeption(Integer ch) {
+        if (ch < 99 || ch > 99) {
             return true;
         }
         return false;
@@ -20,6 +20,7 @@ class Product {
     private String name;
     private Double price;
     private Integer stock;
+    private Integer count = 1;
 
     public Product() {
     }
@@ -59,6 +60,14 @@ class Product {
         this.price = price;
     }
 
+    public void setProductCount() {
+        this.count += 1;
+    }
+
+    public int getProductCount() {
+        return count;
+    }
+
     /**
      * @return the stock
      */
@@ -90,35 +99,6 @@ class Product {
         return hash;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Product other = (Product) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.pid, other.pid)) {
-            return false;
-        }
-        if (!Objects.equals(this.price, other.price)) {
-            return false;
-        }
-        /*
-        if (!Objects.equals(this.stock, other.stock)) {
-            return false;
-        }
-         */
-        return true;
-    }
-
     /**
      * @param pid the pid to set
      */
@@ -133,51 +113,70 @@ class Store extends Product {
 
     List<Product> products = new ArrayList<Product>();
     int i = 0;
+
     public void addItems(String name, Double price, Integer stock) {
         products.add(new Product(i + 1, name, price, stock));
         i++;
     }
+    List<Product> productsCheaperThan10 = new ArrayList<>();
+    List<Product> expensiveProducts = new ArrayList<>();
+    List<Product> middlePriceProducts = new ArrayList<>();
+    public void sortByPrice(){
+        for (Product prod:products){
+            if (prod.getPrice()<10){
+                productsCheaperThan10.add(prod);
+            }else if (prod.getPrice()>20){
+                expensiveProducts.add(prod);
+            }else {
+                middlePriceProducts.add(prod);
+            }
+        }
 
-    public List<Product> getProducts() {
+    }
+
+    private List<Product> getProducts() {
         return this.products;
     }
-
-    public void printItems() {
-        String[] itemName = new String[10];
-        Double[] itemPrice = new Double[10];
-        Integer[] itemStock = new Integer[10];
-        for (int i = 0; i < itemName.length; i++) {
-                /*
-                itemName[i] = getName();
-                itemPrice[i] = getPrice();
-                itemStock[i] = getStock();
-                 */
-            System.out.println(products);
-        }
-    }
-
-    public void displayStoreProducts() {
-        //List<Product> products = this.products;
+    private void displayItems(List<Product> products){
         for (Product prod : products) {
             System.out.println(
                     prod.getPid() + "- " +
-                            prod.getName() + " " +
-                            prod.getPrice() + " " +
+                            prod.getName() + " price:" +
+                            prod.getPrice() + " stock:" +
                             prod.getStock()
             );
         }
     }
-    class Cart {
-        Product product;
-    public Cart(){
-        this.product= new Product();
+
+    public void displayStoreProducts() {
+        sortByPrice();
+        System.out.println("<10");
+        displayItems(productsCheaperThan10);
+        System.out.println("10-20");
+        displayItems(middlePriceProducts);
+        System.out.println("20>");
+        displayItems(expensiveProducts);
+
     }
+
+    class Cart {
+        public Cart() {
+        }
+
         List<Product> cartItems = new ArrayList<Product>();
-        List<Product> productList = new ArrayList<>();
 
         public void addProductToCartByPID(int pid) {
-            Product product = getProductByProductID(pid);
-            addToCart(product);
+            try {
+                Product product = getProductByProductID(pid);
+                if (checkCartItems(product)) {
+                    addToCart(product);
+                }
+                if (product.getStock() == product.getProductCount()) {
+                    System.out.println("No more available stock");
+                }
+            } catch (NullPointerException e) {
+                System.out.println("Chosen incorrect product ID");
+            }
         }
 
         private Product getProductByProductID(int pid) {
@@ -193,7 +192,11 @@ class Store extends Product {
         }
 
         private void addToCart(Product product) {
-            cartItems.add(product);
+            for (Product prod : products) {
+                if (prod.getName() == product.getName()) {
+                    cartItems.add(product);
+                }
+            }
         }
 
         public void removeProductByPID(int pid) {
@@ -201,76 +204,49 @@ class Store extends Product {
             cartItems.remove(prod);
         }
 
-        void printCartItems() {
-            int i=0;
-            addCartItems(cartItems);
+        public boolean printCartItems() {
             try {
+                System.out.println("Cart items:");
                 if (cartItems.size() != 0) {
-                    //System.out.println(addCartItems(cartItems));
-                    /*for (Product prod : cartItems) {
-                        System.out.println(prod.getName()+" "+ i+1 +" "+ prod.getPrice()*1+i);
+                    for (Product prod : cartItems) {
+                        System.out.println(prod.getPid() + "- " + prod.getName() + " "
+                                + prod.getProductCount() + " " + prod.getPrice() * prod.getProductCount());
                     }
-                     */
-                    for (Product prod : productList) {
-                        System.out.println(prod.getName() + " " +
-                                addCartItems(cartItems) + " " +
-                                prod.getPrice() * addCartItems(cartItems));
-                    }
-
-                }else{
+                    System.out.println("**********");
+                    return true;
+                } else {
                     System.out.println("Shopping cart is empty");
                 }
 
-            }catch (Exception e){
-                System.out.println("Shopping cart is empty");
+            } catch (NullPointerException e) {
+                System.out.println("error");
             }
+            return false;
         }
-        private Integer addCartItems(List<Product> cartItems){
-            int countA=0;
-            if (productList.size() == 0){
-                productList = cartItems;
+
+        int count = 1;
+
+        private boolean checkCartItems(Product product) {
+            for (Product prod : cartItems) {
+                if (product == prod) {
+                    if (prod.getProductCount() == product.getStock()) {
+                        return false;
+                    }
+                    prod.setProductCount();
+                    cartItems.remove(prod);
+                    break;
+                }
             }
-           for (Product prod : cartItems) {
-               /*
-               if (j==0) {
-                   productList = cartItems;
-                   j=1;
-               }
-
-                */
-               //for (Product prod2 : productList){
-
-                    /*
-                    if (prod !=prod2) {
-                        productList.add(prod);
-                    }
-
-                     */
-                    /*
-                    if (prod != prod2) {
-                        productList.remove(prod);
-                    }
-
-                     */
-                    countA= Collections.frequency(cartItems, prod);
-                //}
-
-           }
-
-            return countA;
+            return true;
         }
     }
 }
-
-
 
 public class Main {
     public static void main(String[] args) {
         Store s = new Store();
         s.addItems("cos", 10d, 5);
         s.addItems("cos2", 20d, 10);
-        //s.addItems("cos", 10d, 5);
-        //s.displayStoreProducts();
         int ch = 0;
         Store.Cart cart = s.new Cart();
         do {
@@ -290,16 +266,23 @@ public class Main {
                     ch = Integer.parseInt(in.nextLine());
                     switch (ch) {
                         case 1:
-                            System.out.println("Choose item number:");
+                            System.out.println("Choose item ID:");
                             do {
                                 s.displayStoreProducts();
                                 System.out.println("Type 0 to end");
                                 pid = Integer.parseInt(in.nextLine());
+                                if (pid == 0) {
+                                    break;
+                                }
                                 cart.addProductToCartByPID(pid);
                                 cart.printCartItems();
-                            }while (pid !=0);
+                            } while (pid != 0);
                             break;
                         case 2:
+                            if (!cart.printCartItems()) {
+                                break;
+                            }
+                            System.out.println("Choose product to remove");
                             pid = ch = Integer.parseInt(in.nextLine());
                             cart.removeProductByPID(pid);
                             break;
@@ -313,21 +296,21 @@ public class Main {
                     break;
                 case 3:
                     do {
-                    System.out.println("Add name to an Item:");
-                    Scanner sc = new Scanner(System.in);
-                    String productName = sc.nextLine();
-                    System.out.println("Add price:");
-                    Scanner sc2 = new Scanner(System.in);
-                    double price = sc2.nextDouble();
-                    System.out.println("Add stock:");
-                    Scanner sc3 = new Scanner(System.in);
-                    int stock = sc3.nextInt();
+                        System.out.println("Add name to an Item:");
+                        Scanner sc = new Scanner(System.in);
+                        String productName = sc.nextLine();
+                        System.out.println("Add price:");
+                        Scanner sc2 = new Scanner(System.in);
+                        double price = sc2.nextDouble();
+                        System.out.println("Add stock:");
+                        Scanner sc3 = new Scanner(System.in);
+                        int stock = sc3.nextInt();
                         s.addItems(productName, price, stock);
                         System.out.println("2-9. End adding products");
                         System.out.println("1. To continue");
                         try {
                             ch = Integer.parseInt(in.nextLine());
-                        }catch (Throwable e){
+                        } catch (Throwable e) {
                             System.out.println("Choose ONLY number, Choose your option:");
                         }
                     } while (ch == 1);
