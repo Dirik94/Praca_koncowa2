@@ -1,19 +1,7 @@
 package com.company;
 
+import java.io.*;
 import java.util.*;
-
-class Exeption1 extends Throwable {
-    public Exeption1(Integer ch) {
-        exeption(ch);
-    }
-
-    public boolean exeption(Integer ch) {
-        if (ch < 99 || ch > 99) {
-            return true;
-        }
-        return false;
-    }
-}
 
 class Product {
     private Integer pid;
@@ -107,7 +95,7 @@ class Product {
     }
 }
 
-class Store extends Product {
+class Store {
     public Store() {
     }
 
@@ -118,45 +106,34 @@ class Store extends Product {
         products.add(new Product(i + 1, name, price, stock));
         i++;
     }
-    List<Product> productsCheaperThan10 = new ArrayList<>();
-    List<Product> expensiveProducts = new ArrayList<>();
-    List<Product> middlePriceProducts = new ArrayList<>();
-    public void sortByPrice(){
-        for (Product prod:products){
-            if (prod.getPrice()<10){
-                productsCheaperThan10.add(prod);
-            }else if (prod.getPrice()>20){
-                expensiveProducts.add(prod);
-            }else {
-                middlePriceProducts.add(prod);
-            }
-        }
-
-    }
 
     private List<Product> getProducts() {
         return this.products;
     }
-    private void displayItems(List<Product> products){
-        for (Product prod : products) {
-            System.out.println(
-                    prod.getPid() + "- " +
-                            prod.getName() + " price:" +
-                            prod.getPrice() + " stock:" +
-                            prod.getStock()
-            );
-        }
+
+    private final String a10 = "<10";
+    private final String a20 = ">20";
+    private final String a10_20 = "10-20";
+
+    private void displayItems(Product prod) {
+        System.out.println(
+                prod.getPid() + "- " +
+                        prod.getName() + " price:" +
+                        prod.getPrice() + " stock:" +
+                        prod.getStock()
+        );
     }
 
     public void displayStoreProducts() {
-        sortByPrice();
-        System.out.println("<10");
-        displayItems(productsCheaperThan10);
-        System.out.println("10-20");
-        displayItems(middlePriceProducts);
-        System.out.println("20>");
-        displayItems(expensiveProducts);
-
+        for (Product prod : products) {
+            if (prod.getPrice() < 10) {
+                displayItems(prod);
+            } else if (prod.getPrice() > 20) {
+                displayItems(prod);
+            } else {
+                displayItems(prod);
+            }
+        }
     }
 
     class Cart {
@@ -224,6 +201,17 @@ class Store extends Product {
             return false;
         }
 
+        public StringBuilder printForCart() {
+            StringBuilder sb = new StringBuilder();
+            for (Product prod : cartItems) {
+                sb.append(prod.getPid() + " ");
+                sb.append(prod.getName() + " ");
+                sb.append(prod.getProductCount() + " ");
+                sb.append(prod.getPrice() * prod.getProductCount() + "\n");
+            }
+            return sb;
+        }
+
         int count = 1;
 
         private boolean checkCartItems(Product product) {
@@ -242,86 +230,308 @@ class Store extends Product {
     }
 }
 
+interface person1 {
+    void setPersonName(String personName);
+
+    void setPersonSurname(String personSurname);
+
+    String getPersonName();
+
+    String getPersonSurname();
+}
+
+class person implements person1 {
+    public person() {
+    }
+
+    String personName;
+    String personSurname;
+
+    public person(String personName, String personSurname) {
+        this.personName = personName;
+        this.personSurname = personSurname;
+    }
+
+    public void setPersonName(String personName) {
+        this.personName = personName;
+    }
+
+    public void setPersonSurname(String personSurname) {
+        this.personSurname = personSurname;
+    }
+
+    public String getPersonName() {
+        return personName;
+    }
+
+    public String getPersonSurname() {
+        return personSurname;
+    }
+}
+
+class Client extends person {
+    Store s = new Store();
+    Store.Cart cart;
+
+    public Client() {
+        cart = s.new Cart();
+    }
+
+    public Store.Cart makeCart() {
+        return cart;
+    }
+
+    public Store makeStore() {
+        return s;
+    }
+
+    List<person> clinets = new ArrayList<>();
+
+    public List<person> getClients() {
+        return this.clinets;
+    }
+
+    public void toString1() {
+        for (person client : clinets) {
+            System.out.println(client.getPersonName() + " " + client.getPersonSurname());
+        }
+    }
+
+    public String getClientName() {
+        String surname = null;
+        for (person client : clinets) {
+            surname = client.getPersonSurname();
+        }
+        return surname;
+    }
+
+    public String toString() {
+        for (person client : clinets) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(client.getPersonName() + " ");
+            sb.append(client.getPersonSurname() + " " + "\n");
+            sb.append(cart.printForCart());
+            System.out.println(sb);
+        }
+        return "Client1";
+    }
+    public String toString2() {
+        for (person client : clinets) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(client.getPersonName() + " ");
+            sb.append(client.getPersonSurname() + " " + "\n");
+            sb.append(cart.printForCart());
+            return sb.toString();
+        }
+        return "End";
+    }
+
+    private person getClient(String personSurname) {
+        person client = null;
+        List<person> clients = getClients();
+        for (person client1 : clients) {
+            if (personSurname == client1.getPersonSurname()) {
+                client = client1;
+                break;
+            }
+        }
+        return client;
+    }
+
+    public void addClient(String personName, String personSurname) {
+        clinets.add(new person(personName, personSurname));
+    }
+
+    public void removeClientSurname(String personSurname) {
+        person client = getClient(personSurname);
+        clinets.remove(client);
+    }
+
+}
+
 public class Main {
     public static void main(String[] args) {
-        Store s = new Store();
-        s.addItems("cos", 10d, 5);
-        s.addItems("cos2", 20d, 10);
-        int ch = 0;
-        Store.Cart cart = s.new Cart();
+        List<Client> clientList = new ArrayList<>();
+        Scanner ad = new Scanner(System.in);
+        String surname = null;
+        int ch1;
         do {
-            System.out.println("1. Display Store Products");
-            System.out.println("2. Display Cart");
-            System.out.println("3. Add Items do Store");
-            System.out.println("0. Exit");
-            Scanner in = new Scanner(System.in);
-            ch = Integer.parseInt(in.nextLine());
-            int pid;
-            switch (ch) {
+            System.out.println("1 - Add new client");
+            System.out.println("2 - Print clients Names");
+            System.out.println("3 - Remove Client/Order");
+            System.out.println("4 - Print all Orders");
+            System.out.println("5 - Write order to File");
+            System.out.println("6 - Read file");
+            System.out.println("0 - Exit program");
+            ch1 = Integer.parseInt(ad.nextLine());
+            switch (ch1) {
                 case 1:
-                    s.displayStoreProducts();
-                    System.out.println("1. Add to Cart");
-                    System.out.println("2. Remove From Cart");
-                    System.out.println("0. Exit");
-                    ch = Integer.parseInt(in.nextLine());
-                    switch (ch) {
-                        case 1:
-                            System.out.println("Choose item ID:");
-                            do {
-                                s.displayStoreProducts();
-                                System.out.println("Type 0 to end");
-                                pid = Integer.parseInt(in.nextLine());
-                                if (pid == 0) {
-                                    break;
-                                }
-                                cart.addProductToCartByPID(pid);
-                                cart.printCartItems();
-                            } while (pid != 0);
-                            break;
-                        case 2:
-                            if (!cart.printCartItems()) {
-                                break;
-                            }
-                            System.out.println("Choose product to remove");
-                            pid = ch = Integer.parseInt(in.nextLine());
-                            cart.removeProductByPID(pid);
-                            break;
-                        default:
+                    Client client = new Client();
+                    clientList.add(client);
+                    System.out.println("Add client name");
+                    String name = ad.nextLine();
+                    System.out.println("Add client surname");
+                    surname = ad.nextLine();
+                    client.addClient(name, surname);
+                    client.makeStore().addItems("Cukier", 5d, 5);
+                    client.makeStore().addItems("Mąka", 2.5d, 10);
+                    client.makeStore().addItems("Masło", 11.2d, 5);
+                    client.makeStore().addItems("Mleko", 19.5d, 10);
+                    client.makeStore().addItems("Płatki", 30d, 5);
+                    client.makeStore().addItems("Pizza", 33d, 10);
+                    int ch = 0;
+                    do {
+                        System.out.println("1. Display Store Products");
+                        System.out.println("2. Display Cart");
+                        System.out.println("3. Add Items do Store");
+                        System.out.println("4. Display order");
+                        System.out.println("0. Exit");
+                        Scanner in = new Scanner(System.in);
+                        ch = Integer.parseInt(in.nextLine());
+                        int pid;
+                        switch (ch) {
+                            case 1:
+                                client.makeStore().displayStoreProducts();
+                                System.out.println("1. Add to Cart");
+                                System.out.println("2. Remove From Cart");
+                                System.out.println("0. Exit");
+                                ch = Integer.parseInt(in.nextLine());
+                                switch (ch) {
+                                    case 1:
+                                        System.out.println("Choose item ID:");
+                                        do {
+                                            client.makeStore().displayStoreProducts();
+                                            System.out.println("Type 0 to end");
+                                            pid = Integer.parseInt(in.nextLine());
+                                            if (pid == 0) {
+                                                break;
+                                            }
+                                            client.makeCart().addProductToCartByPID(pid);
+                                            client.makeCart().printCartItems();
+                                        } while (pid != 0);
+                                        break;
+                                    case 2:
+                                        if (!client.makeCart().printCartItems()) {
+                                            break;
+                                        }
+                                        System.out.println("Choose product to remove");
+                                        pid = ch = Integer.parseInt(in.nextLine());
+                                        client.makeCart().removeProductByPID(pid);
+                                        break;
+                                    case 0:
+                                        ch = 1;
+                                        break;
+                                    default:
 
-                            break;
-                    }
+                                        break;
+                                }
+                                break;
+                            case 2:
+                                client.makeCart().printCartItems();
+                                break;
+                            case 3:
+                                do {
+                                    System.out.println("Add name to an Item:");
+                                    Scanner sc = new Scanner(System.in);
+                                    String productName = sc.nextLine();
+                                    System.out.println("Add price:");
+                                    Scanner sc2 = new Scanner(System.in);
+                                    double price = sc2.nextDouble();
+                                    System.out.println("Add stock:");
+                                    Scanner sc3 = new Scanner(System.in);
+                                    int stock = sc3.nextInt();
+                                    client.makeStore().addItems(productName, price, stock);
+                                    System.out.println("2-9. End adding products");
+                                    System.out.println("1. To continue");
+                                    try {
+                                        ch = Integer.parseInt(in.nextLine());
+                                    } catch (Throwable e) {
+                                        System.out.println("Choose ONLY number, Choose your option:");
+                                    }
+                                } while (ch == 1);
+                                break;
+                            case 4:
+                                client.toString();
+                                break;
+                            case 0:
+
+                                break;
+                            default:
+
+                                break;
+                        }
+                    } while (ch != 0);
                     break;
                 case 2:
-                    cart.printCartItems();
+                    for (Client client1 : clientList) {
+                        client1.toString1();
+                    }
                     break;
                 case 3:
-                    do {
-                        System.out.println("Add name to an Item:");
-                        Scanner sc = new Scanner(System.in);
-                        String productName = sc.nextLine();
-                        System.out.println("Add price:");
-                        Scanner sc2 = new Scanner(System.in);
-                        double price = sc2.nextDouble();
-                        System.out.println("Add stock:");
-                        Scanner sc3 = new Scanner(System.in);
-                        int stock = sc3.nextInt();
-                        s.addItems(productName, price, stock);
-                        System.out.println("2-9. End adding products");
-                        System.out.println("1. To continue");
-                        try {
-                            ch = Integer.parseInt(in.nextLine());
-                        } catch (Throwable e) {
-                            System.out.println("Choose ONLY number, Choose your option:");
+                    System.out.println("Choose client surname");
+                    String surname1 = ad.nextLine();
+                    String surname2 = null;
+                    for (Client client1 : clientList) {
+                        surname2 = client1.getClientName();
+                        if (surname1 == surname2) {
+                            client1.removeClientSurname(surname1);
+                            break;
                         }
-                    } while (ch == 1);
+                    }
+                    break;
+                case 4:
+                    if (clientList.size() == 0) {
+                        System.out.println("There are no clients");
+                        break;
+                    }
+                    for (Client client1 : clientList) {
+                        client1.toString();
+                    }
+                    break;
+                case 5:
+                    try {
+                        File myObj = new File("Order_List.txt");
+                        if (myObj.createNewFile()) {
+                            System.out.println("File created: " + myObj.getName());
+                        } else {
+                            System.out.println("File already exists.");
+                        }
+                    } catch (IOException e) {
+                        System.out.println("An error occurred.");
+                        e.printStackTrace();
+                    }
+                    try {
+                        FileWriter myWriter = new FileWriter("Order_List.txt");
+                        for (Client client1:clientList) {
+                            myWriter.write(client1.toString2());
+                        }
+                        myWriter.close();
+                        System.out.println("Successfully wrote to the file.");
+                    } catch (IOException e) {
+                        System.out.println("An error occurred.");
+                        e.printStackTrace();
+                    }
+                    break;
+                case 6:
+                    try {
+                    File myObj = new File("Order_List.txt");
+                    Scanner myReader = new Scanner(myObj);
+                    while (myReader.hasNextLine()) {
+                        String data = myReader.nextLine();
+                        System.out.println(data);
+                    }
+                    myReader.close();
+                } catch (FileNotFoundException e) {
+                    System.out.println("An error occurred.");
+                    e.printStackTrace();
+                }
                     break;
                 case 0:
                     System.exit(0);
                     break;
                 default:
-
                     break;
             }
-        } while (ch != 0);
+        } while (ch1 != 0);
     }
 }
